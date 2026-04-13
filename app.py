@@ -1,3 +1,4 @@
+import streamlit.components.v1 as components
 import streamlit as st
 import numpy as np
 from PIL import Image
@@ -232,6 +233,7 @@ def load_model():
     return keras.models.load_model(MODEL_PATH, compile=False)
 
 model = load_model()
+st.markdown('<style>div[data-testid="stMarkdownContainer"] > div {display:block;}</style>', unsafe_allow_html=True)
 
 # ── Hero ──────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -285,8 +287,31 @@ if uploaded_file:
 
         desc = FOOD_DESC.get(top_label, "A delicious Mumbai street food.")
 
-        st.markdown(f"""
+        html_result = f"""
         <div class="result-outer">
+          <div class="result-inner">
+            <div class="result-image-wrap">
+              <img src="data:image/jpeg;base64,{b64}" alt="{top_label}" />
+            </div>
+            <div class="result-info">
+              <span class="result-tag">Prediction</span>
+              <p class="result-food-name">{top_label}</p>
+              <p class="result-desc">{desc}</p>
+              <div class="conf-block">
+                <div class="conf-num">{confidence:.0f}%</div>
+                <div class="conf-right">
+                  <div class="conf-lbl">Confidence Score</div>
+                  <div class="conf-track">
+                    <div class="conf-fill" style="width:{confidence:.1f}%"></div>
+                  </div>
+                </div>
+              </div>
+              <p class="probs-lbl">All Classes</p>
+              {prob_rows_html}
+            </div>
+          </div>
+        </div>"""
+        st.components.v1.html(html_result, height=700, scrolling=True)
           <div class="result-inner">
 
             <div class="result-image-wrap">
