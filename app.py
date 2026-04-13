@@ -9,7 +9,7 @@ import tensorflow as tf
 import io
 import base64
 
-# ── Page config ──────────────────────────────────────────────────────────────
+# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Mumbai Street Food Classifier",
     page_icon="🍽️",
@@ -19,99 +19,194 @@ st.set_page_config(
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
+html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+
+.stApp { background: linear-gradient(145deg, #1a0a00 0%, #2d1200 50%, #1a0800 100%); }
+
+.hero-wrap {
+    text-align: center;
+    padding: 2rem 0 1.2rem;
 }
-
-h1, h2, h3 {
-    font-family: 'Playfair Display', serif;
-}
-
-.main {
-    background: #fdf6ec;
-}
-
-.stApp {
-    background: linear-gradient(135deg, #fdf6ec 0%, #fff8f0 100%);
-}
-
 .hero-title {
     font-family: 'Playfair Display', serif;
-    font-size: 2.6rem;
-    color: #1a1a1a;
-    text-align: center;
-    margin-bottom: 0.2rem;
-    line-height: 1.2;
-}
-
-.hero-subtitle {
-    text-align: center;
-    color: #7a5c3b;
-    font-size: 1rem;
-    margin-bottom: 2rem;
-    letter-spacing: 0.04em;
-}
-
-.badge {
-    display: inline-block;
-    background: #f4a435;
-    color: white;
-    font-size: 0.72rem;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-
-.result-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.6rem 2rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-    border-left: 5px solid #f4a435;
-    margin-top: 1.5rem;
-}
-
-.result-label {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    color: #1a1a1a;
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    color: #fff;
+    line-height: 1.15;
     margin: 0;
 }
-
-.result-confidence {
-    font-size: 1rem;
-    color: #7a5c3b;
-    margin-top: 0.2rem;
-}
-
-.food-info {
-    background: #fffbf5;
-    border-radius: 10px;
-    padding: 0.9rem 1.2rem;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: #4a3520;
-    border: 1px solid #f0e0c8;
+.hero-accent { color: #f4a435; }
+.hero-sub {
+    color: #c8956a;
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
 }
 
 .stFileUploader > div {
     border: 2px dashed #f4a435 !important;
-    border-radius: 14px !important;
-    background: #fffbf5 !important;
+    border-radius: 16px !important;
+    background: rgba(244,164,53,0.06) !important;
 }
 
-.model-info {
-    font-size: 0.78rem;
-    color: #aaa;
-    text-align: center;
+/* Result card */
+.result-outer {
+    background: linear-gradient(135deg, #f4a435 0%, #ff6b00 100%);
+    border-radius: 20px;
+    padding: 2px;
     margin-top: 2rem;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.result-inner {
+    background: #1e0d00;
+    border-radius: 18px;
+    overflow: hidden;
+}
+.result-image-wrap {
+    width: 100%;
+    background: #1e0d00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.result-image-wrap img {
+    max-width: 100%;
+    max-height: 260px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 10px;
+    display: block;
+}
+.result-info {
+    padding: 1.2rem 1.4rem 1.6rem;
+}
+.result-tag {
+    display: inline-block;
+    background: #f4a435;
+    color: #1a0800;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+.result-food-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    color: #fff;
+    margin: 0 0 0.3rem;
+    line-height: 1.1;
+}
+.result-desc {
+    color: #c8956a;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    margin: 0 0 1.2rem;
+    line-height: 1.5;
 }
 
-footer {visibility: hidden;}
+/* Confidence block */
+.conf-block {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(244,164,53,0.1);
+    border: 1px solid rgba(244,164,53,0.25);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.2rem;
+}
+.conf-num {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: #f4a435;
+    line-height: 1;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+.conf-right { flex: 1; min-width: 0; }
+.conf-lbl {
+    color: #e0b080;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+.conf-track {
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    height: 9px;
+    overflow: hidden;
+}
+.conf-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #f4a435, #ff6b00);
+}
+
+/* Prob bars */
+.probs-lbl {
+    color: #c8956a;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 0.7rem;
+    font-weight: 600;
+}
+.prob-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.prob-name {
+    color: #e0b080;
+    font-size: clamp(0.72rem, 2vw, 0.82rem);
+    width: 110px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.prob-track {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    height: 7px;
+    overflow: hidden;
+    min-width: 0;
+}
+.prob-fill { height: 100%; border-radius: 99px; background: rgba(244,164,53,0.35); }
+.prob-fill.top { background: linear-gradient(90deg,#f4a435,#ff6b00); }
+.prob-pct {
+    color: #c8956a;
+    font-size: 0.76rem;
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.footer {
+    text-align: center;
+    color: #6b3d1a;
+    font-size: 0.72rem;
+    margin-top: 2rem;
+    padding-bottom: 1.5rem;
+}
+footer { visibility: hidden; }
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+    .result-info { padding: 1rem 1rem 1.2rem; }
+    .conf-block { padding: 0.7rem 0.8rem; }
+    .prob-name { width: 90px; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -120,13 +215,13 @@ CLASS_NAMES = ["Grilled Sandwich", "Idli", "Masala Dosa", "Paani Puri", "Samosa"
 IMG_SIZE    = (224, 224)
 MODEL_PATH  = "model_resaved.h5"
 
-FOOD_INFO = {
-    "Vada Pav":  "🥔 Mumbai's iconic street burger — spiced potato fritter in a bun.",
-    "Grilled Sandwich":  "🥪 Mumbai-style toasted sandwich, often layered with chutney & veggies.",
-    "Samosa":    "🔺 Crispy pastry stuffed with spiced potatoes and peas.",
-    "Paani Puri": "💧 Hollow crisp shells filled with tangy tamarind water.",
-    "Masala Dosa":      "🫓 Thin crispy South Indian crepe made from fermented rice batter.",
-    "Idli":      "⚪ Soft steamed rice cakes, a South Indian breakfast staple.",
+FOOD_DESC = {
+    "Vada Pav":        "Mumbai's iconic street burger — spiced potato fritter in a soft bun with chutney.",
+    "Grilled Sandwich":"Mumbai-style toasted sandwich, layered with green chutney, veggies & cheese.",
+    "Samosa":          "Crispy golden pastry stuffed with spiced potatoes and peas.",
+    "Paani Puri":      "Hollow crisp shells filled with tangy tamarind water and chickpeas.",
+    "Masala Dosa":     "Thin crispy South Indian crepe made from fermented rice & lentil batter.",
+    "Idli":            "Soft steamed rice cakes, a South Indian breakfast staple served with sambar.",
 }
 
 # ── Load model ────────────────────────────────────────────────────────────────
@@ -138,26 +233,29 @@ def load_model():
 
 model = load_model()
 
-# ── Header ────────────────────────────────────────────────────────────────────
-st.markdown('<div class="hero-title">🍽️ Mumbai Street Food</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero-title" style="color:#f4a435;">Classifier</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero-subtitle">Deep Learning · MobileNetV2 · 91.33% Accuracy</div>', unsafe_allow_html=True)
+# ── Hero ──────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="hero-wrap">
+    <p class="hero-sub">Deep Learning · MobileNetV2 · 91.33% Accuracy</p>
+    <h1 class="hero-title">Mumbai <span class="hero-accent">Street Food</span><br>Classifier</h1>
+</div>
+""", unsafe_allow_html=True)
 
 # ── Upload ────────────────────────────────────────────────────────────────────
 uploaded_file = st.file_uploader(
-    "Upload a food image (JPG / PNG)",
+    "Upload a food image",
     type=["jpg", "jpeg", "png"],
     label_visibility="collapsed"
 )
 
+# ── Predict & Display ─────────────────────────────────────────────────────────
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, use_container_width=True, caption="Uploaded image")
 
     if model is None:
-        st.error("⚠️ `model.h5` not found. Place your trained model file in the same directory as `app.py`.")
+        st.error("⚠️ Model file not found. Make sure `model_resaved.h5` is in your repo.")
     else:
-        with st.spinner("Analysing..."):
+        with st.spinner("Classifying..."):
             img_array = np.array(image.resize(IMG_SIZE)) / 255.0
             img_array = np.expand_dims(img_array, axis=0)
             preds     = model.predict(img_array)[0]
@@ -166,33 +264,67 @@ if uploaded_file:
         top_label  = CLASS_NAMES[top_idx]
         confidence = float(preds[top_idx]) * 100
 
+        # Encode image to base64
+        buf = io.BytesIO()
+        image.save(buf, format="JPEG")
+        b64 = base64.b64encode(buf.getvalue()).decode()
+
+        # Probability rows sorted high to low
+        prob_rows_html = ""
+        for i in np.argsort(preds)[::-1]:
+            pct    = float(preds[i]) * 100
+            is_top = "top" if i == top_idx else ""
+            prob_rows_html += f"""
+            <div class="prob-row">
+                <span class="prob-name">{CLASS_NAMES[i]}</span>
+                <div class="prob-track">
+                    <div class="prob-fill {is_top}" style="width:{pct:.1f}%"></div>
+                </div>
+                <span class="prob-pct">{pct:.1f}%</span>
+            </div>"""
+
+        desc = FOOD_DESC.get(top_label, "A delicious Mumbai street food.")
+
         st.markdown(f"""
-        <div class="result-card">
-            <p class="result-label">{top_label}</p>
-            <p class="result-confidence">Confidence: <strong>{confidence:.1f}%</strong></p>
-            <div class="food-info">{FOOD_INFO[top_label]}</div>
+        <div class="result-outer">
+          <div class="result-inner">
+
+            <div class="result-image-wrap">
+              <img src="data:image/jpeg;base64,{b64}" alt="{top_label}" />
+            </div>
+
+            <div class="result-info">
+              <span class="result-tag">Prediction</span>
+              <p class="result-food-name">{top_label}</p>
+              <p class="result-desc">{desc}</p>
+
+              <div class="conf-block">
+                <div class="conf-num">{confidence:.0f}%</div>
+                <div class="conf-right">
+                  <div class="conf-lbl">Confidence Score</div>
+                  <div class="conf-track">
+                    <div class="conf-fill" style="width:{confidence:.1f}%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="probs-lbl">All Classes</p>
+              {prob_rows_html}
+            </div>
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # ✅ NEW ADDITION (Top 3 predictions with %)
-        st.markdown("#### 🔍 Top Predictions")
-        top3_idx = preds.argsort()[-3:][::-1]
-        for i in top3_idx:
-            st.write(f"{CLASS_NAMES[i]} — {preds[i]*100:.2f}%")
-
-        # Probability bar chart
-        st.markdown("#### All class probabilities")
-        prob_dict = {CLASS_NAMES[i]: float(preds[i]) for i in range(len(CLASS_NAMES))}
-        st.bar_chart(prob_dict)
-
 else:
-    st.info("👆 Upload an image of Mumbai street food to get started.")
+    st.markdown(
+        "<p style='text-align:center;color:#6b3d1a;margin-top:1.5rem;font-size:0.95rem;'>👆 Upload a street food image to classify it.</p>",
+        unsafe_allow_html=True
+    )
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="model-info">
-    Model: MobileNetV2 (Transfer Learning) &nbsp;|&nbsp;
-    Dataset: 2,400 images, 6 classes &nbsp;|&nbsp;
-    Research by Shruti Kesharwani
+<div class="footer">
+    MobileNetV2 · 2,400 images · 6 classes · 91.33% accuracy<br>
+    Research by Shruti Kesharwani · B.K. Birla College, Kalyan
 </div>
 """, unsafe_allow_html=True)
